@@ -2,7 +2,7 @@ import { createSlice,type PayloadAction } from "@reduxjs/toolkit";
 import { Status } from "../globals/types/type";
 import axios from "axios";
 import type { AppDispatch } from "./store";
-
+import API from "../http";
 
 interface ILoginUser{
     email : string, 
@@ -46,7 +46,7 @@ export default authSlice.reducer
 export function registerUser(data:IUser){
     return async function registerUserThunk(dispatch:AppDispatch){
         try {
-            const response = await axios.post("http://localhost:3000/api/auth/register",data)
+             const response = await API.post("/auth/register",data)
             console.log(response)
             if(response.status === 201){
                 dispatch(setStatus(Status.SUCCESS))
@@ -61,10 +61,10 @@ export function registerUser(data:IUser){
 
     }
 }
-function loginUser(data:ILoginUser){
+export function loginUser(data:ILoginUser){
     return async function loginUserThunk(dispatch:AppDispatch){
         try {
-            const response = await axios.post("http://localhost:3000/api/auth/login",data)
+               const response = await API.post("/auth/login",data)
             console.log(response)
             if(response.status === 200){
                 dispatch(setStatus(Status.SUCCESS))
@@ -80,7 +80,7 @@ function loginUser(data:ILoginUser){
 function forgotPassword(data:{email : string}){
     return async function forgotPasswordThunk(dispatch:AppDispatch){
         try {
-            const response = await axios.post("http://localhost:3000/api/auth/forgot-password",data)
+             const response = await API.post("/auth/forgot-password",data)
             console.log(response)
             if(response.status === 200){
                 dispatch(setStatus(Status.SUCCESS))
