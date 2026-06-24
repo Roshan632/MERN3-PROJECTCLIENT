@@ -13,12 +13,12 @@ const userSlice=createSlice({
     name:"user",  //room/slice ko naam
     initialState:userInfo,
     reducers:{   //initial state ko value change garna reducer chahinxa
-        setName(state:User,action:PayloadAction<User>){
-            state.name="hahahehehuhu"
+        setName(state:User,action:PayloadAction<string>){
+            state.name=action.payload  //accept the data
 
         },
-        setAge(state:User,action:PayloadAction<User>){
-            state.age=21
+        setAge(state:User,action:PayloadAction<number>){
+            state.age=action.payload
 
         }
 
