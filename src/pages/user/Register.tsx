@@ -2,7 +2,7 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
 import { useAppDispatch,useAppSelector } from "../../store/hooks"
 import { registerUser } from "../../store/authSlice"
 import { Status } from "../../globals/types/type"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 function Register(){
 
@@ -18,14 +18,15 @@ function Register(){
     // useSelector() + types      
 
     //data haru slice bata nikalna yo hook haru use garne 
-     const {status} = useAppSelector((store)=>store.auth)
+    
+    const {status} = useAppSelector((store)=>store.auth)
     const navigate = useNavigate()
- 
     const dispatch = useAppDispatch()
     const [data,setData] = useState({
         username : "", 
         password : "", 
-        email : ""
+        email : "",
+        token : ""
     })
     const handleChange = (e:ChangeEvent<HTMLInputElement>)=>{
         const {name,value} = e.target 
@@ -34,12 +35,12 @@ function Register(){
             [name] : value
         })
     }
-     const handleSubmit = (e:FormEvent<HTMLFormElement>)=>{
+
+    const handleSubmit =  (e:FormEvent<HTMLFormElement>)=>{
         e.preventDefault()
         dispatch(registerUser(data))
     }
-
-      useEffect(()=>{
+    useEffect(()=>{
         if(status === Status.SUCCESS){
             navigate("/login")
         }else if (status === Status.ERROR){
@@ -47,7 +48,7 @@ function Register(){
         }
     },[status])
 
-    return(
+    return ( 
         <div className="bg-gray-100 flex h-screen items-center justify-center px-4 sm:px-6 lg:px-8">
     <div className="w-full max-w-md space-y-8">
         <div className="bg-white shadow-md rounded-md p-6">
@@ -55,7 +56,7 @@ function Register(){
             <img className="mx-auto h-12 w-auto" src="https://www.svgrepo.com/show/499664/user-happy.svg" alt="" />
 
             <h2 className="my-3 text-center text-3xl font-bold tracking-tight text-gray-900">
-                Sign up For Register
+                Sign up htmlFor an account
             </h2>
 
 
@@ -85,7 +86,7 @@ function Register(){
                     </div>
                 </div>
 
-         
+
 
                 <div>
                     <button type="submit"
@@ -93,12 +94,14 @@ function Register(){
                         Account
                         </button>
                 </div>
+                <p className="text-blue-500">Wanna login? <Link to='/login'> Go to Login</Link></p>
             </form>
         </div>
     </div>
 </div>
     )
 }
+
 
     
 

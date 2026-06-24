@@ -1,6 +1,6 @@
 import { createSlice,type PayloadAction } from "@reduxjs/toolkit";
 import { Status } from "../globals/types/type";
-import axios from "axios";
+
 import type { AppDispatch } from "./store";
 import API from "../http";
 
@@ -12,19 +12,22 @@ interface ILoginUser{
 interface IUser{
     username : string | null, 
     email : string | null 
-    password : string | null
+    password : string | null,
+    token:string | null
 }
 
 interface IAuthState{
     user : IUser, 
-    status : Status
+    status : Status,
+    
 }
 
 const initialState:IAuthState = {
     user : {
         username : null, 
         email : null, 
-        password : null
+        password : null,
+        token:null
     }, 
     status : Status.LOADING
 }
@@ -37,10 +40,13 @@ const authSlice = createSlice({
         }, 
         setStatus(state:IAuthState,action:PayloadAction<Status>){
             state.status = action.payload
-        }
+        },
+         setToken(state:IAuthState,action:PayloadAction<string>){
+            state.user.token = action.payload
     }
+}
 })
-export const {setStatus,setUser} = authSlice.actions
+export const {setStatus,setUser,setToken} = authSlice.actions
 export default authSlice.reducer
 
 export function registerUser(data:IUser){
@@ -50,7 +56,14 @@ export function registerUser(data:IUser){
             console.log(response)
             if(response.status === 201){
                 dispatch(setStatus(Status.SUCCESS))
-                dispatch(setUser(data))
+                
+                if(response.data.token){
+                    localStorage.setItem("tokenHoYo",response.data.token)
+                    dispatch(setToken(response.data.token))
+                }else{
+                    dispatch(setStatus(Status.ERROR))
+                }
+               
             }else{
                 dispatch(setStatus(Status.ERROR))
             }

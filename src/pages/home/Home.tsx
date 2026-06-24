@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom"
 
+import Navbar from "../../globals/components/Navbar"
 
 function Home(){
     return (
@@ -37,19 +38,19 @@ function Home(){
       </div>
     </div>
   </header>
+  <Navbar/>
   <main className="text-gray-900">
     <section className="pt-20 md:pt-40">
       <div className="container mx-auto px-8 lg:flex">
         <div className="text-center lg:text-left lg:w-1/2">
-          <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold leading-none">Main title of your
-            landing page</h1>
-          <p className="text-xl lg:text-2xl mt-6 font-light">Free landing page template to promote your
-            business startup and generate leads for the offered services
-          </p>
+           <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold leading-none">Hamro Dokaan...</h1>
+          <p className="text-xl lg:text-2xl mt-6 font-light">Visit our store to buy your
+            any household materials, products..
+            </p>
           <p className="mt-8 md:mt-12">
             <button type="button" className=" py-4 px-12 bg-teal-500 hover:bg-teal-600 rounded text-white">Get Started</button>
           </p>
-          <p className="mt-4 text-gray-600">Sed fermentum felis ut cursu
+          <p className="mt-4 text-gray-600">We Provide Quality Products
           </p>
         </div>
         <div className="lg:w-1/2">
