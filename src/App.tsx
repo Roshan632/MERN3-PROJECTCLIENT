@@ -6,6 +6,7 @@ import { Provider } from 'react-redux'
 import store from './store/store'
 import Home from './pages/home/Home'
 import Login from './pages/user/Login'
+import Product from './pages/product/Product'
 
 function App() {
   
@@ -16,8 +17,12 @@ function App() {
 
      <BrowserRouter>
      <Routes>
+      <Route path='/' element={<Home/>}/>
       <Route path='/register' element={<Register/>}/>
        <Route path='/login' element={<Login />}/>
+       <Route path='/products' element={<Product/>}/>
+       
+       
      </Routes>
      
      </BrowserRouter>
