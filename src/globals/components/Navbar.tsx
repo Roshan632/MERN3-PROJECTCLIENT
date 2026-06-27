@@ -1,20 +1,19 @@
-import { Link } from "react-router-dom"
-import { useAppSelector } from "../../store/hooks"
+import { Link, useNavigate } from "react-router-dom"
+import { useAppSelector, useAppDispatch } from "../../store/hooks"
 import { useEffect, useState } from "react"
+import { logout } from "../../store/authSlice"
 
 
 function Navbar(){
+    const dispatch = useAppDispatch()
+    const navigate = useNavigate()
     const reduxToken = useAppSelector((store)=>store.auth.user.token)
-    const localStorageToken = localStorage.getItem("tokenHoYo")
     const [isLoggedIn,setIsLoggedIn] = useState<boolean>(false)
 
     useEffect(()=>{
-        setIsLoggedIn(!!localStorageToken || !!reduxToken)
-        // if(reduxToken && localStorageToken){
-        //     setIsLoggedIn(true)
-        // }
-    },[])
-    console.log(isLoggedIn)
+      const localStorageToken = localStorage.getItem("tokenHoYo")
+      setIsLoggedIn(!!localStorageToken || !!reduxToken)
+    },[reduxToken])
 
 return ( 
     <header className="sticky top-0 bg-white shadow">
@@ -40,10 +39,10 @@ return (
       <div className="hidden md:block">
         {
             isLoggedIn ? (
-                <Link to='/logout'>
-                <button type="button" className="mr-5 py-3 px-8 text-sm bg-teal-500 hover:bg-teal-600 rounded text-white ">Logout
-                     </button>
-                </Link>
+              <>
+              <button onClick={() => { dispatch(logout()); navigate('/login'); }} type="button" className="mr-5 py-3 px-8 text-sm bg-teal-500 hover:bg-teal-600 rounded text-white ">Logout
+                 </button>
+              </>
             )  : (
                 <>
                 <Link to='/register'>

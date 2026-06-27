@@ -41,29 +41,43 @@ const authSlice = createSlice({
         setStatus(state:IAuthState,action:PayloadAction<Status>){
             state.status = action.payload
         },
-         setToken(state:IAuthState,action:PayloadAction<string>){
+        setToken(state:IAuthState,action:PayloadAction<string>){
             state.user.token = action.payload
-    }
+        },
+        logout(state:IAuthState){
+            state.user = {
+                username: null,
+                email: null,
+                password: null,
+                token: null
+            }
+            state.status = Status.LOADING
+            localStorage.removeItem("tokenHoYo")
+        }
 }
 })
-export const {setStatus,setUser,setToken} = authSlice.actions
+export const {setStatus,setUser,setToken,logout} = authSlice.actions
 export default authSlice.reducer
 
 export function registerUser(data:IUser){
     return async function registerUserThunk(dispatch:AppDispatch){
+        dispatch(setStatus(Status.LOADING))
         try {
              const response = await API.post("/auth/register",data)
             console.log(response)
             if(response.status === 201){
-                dispatch(setStatus(Status.SUCCESS))
-                
                 if(response.data.token){
                     localStorage.setItem("tokenHoYo",response.data.token)
                     dispatch(setToken(response.data.token))
-                }else{
-                    dispatch(setStatus(Status.ERROR))
                 }
-               
+
+                dispatch(setUser({
+                    username: response.data?.username ?? data.username,
+                    email: response.data?.email ?? data.email,
+                    password: null,
+                    token: response.data?.token ?? null
+                }))
+                dispatch(setStatus(Status.SUCCESS))
             }else{
                 dispatch(setStatus(Status.ERROR))
             }
@@ -76,10 +90,22 @@ export function registerUser(data:IUser){
 }
 export function loginUser(data:ILoginUser){
     return async function loginUserThunk(dispatch:AppDispatch){
+        dispatch(setStatus(Status.LOADING))
         try {
                const response = await API.post("/auth/login",data)
             console.log(response)
             if(response.status === 200){
+                if(response.data?.token){
+                    localStorage.setItem("tokenHoYo",response.data.token)
+                    dispatch(setToken(response.data.token))
+                }
+
+                dispatch(setUser({
+                    username: response.data?.username ?? null,
+                    email: response.data?.email ?? data.email,
+                    password: null,
+                    token: response.data?.token ?? null
+                }))
                 dispatch(setStatus(Status.SUCCESS))
             }else{
                 dispatch(setStatus(Status.ERROR))

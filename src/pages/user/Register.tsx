@@ -1,24 +1,10 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
 import { useAppDispatch,useAppSelector } from "../../store/hooks"
-import { registerUser } from "../../store/authSlice"
+import { registerUser, setStatus } from "../../store/authSlice"
 import { Status } from "../../globals/types/type"
 import { Link, useNavigate } from "react-router-dom"
 
 function Register(){
-
-    //  const data = useAppSelector((store)=>store.user)
-    // console.log(data)
-    // const dispatch = useAppDispatch()
-    // dispatch(setName("Hari Bahadur"))
-    // dispatch(setAge(100))
-
-     // insertion garne or update garne, POST, PUT/Patch, INSERT, update, --> useDispatch() + types, --> kunai action trigger garnu paryo vane paaani
-
-    // select garnu paryo, select * from , .find()
-    // useSelector() + types      
-
-    //data haru slice bata nikalna yo hook haru use garne 
-    
     const {status} = useAppSelector((store)=>store.auth)
     const navigate = useNavigate()
     const dispatch = useAppDispatch()
@@ -40,13 +26,18 @@ function Register(){
         e.preventDefault()
         dispatch(registerUser(data))
     }
+
+    useEffect(() => {
+        dispatch(setStatus(Status.LOADING))
+    }, [dispatch])
+
     useEffect(()=>{
         if(status === Status.SUCCESS){
             navigate("/login")
         }else if (status === Status.ERROR){
             alert("Something went wrong")
         }
-    },[status])
+    },[status,navigate])
 
     return ( 
         <div className="bg-gray-100 flex h-screen items-center justify-center px-4 sm:px-6 lg:px-8">
@@ -56,7 +47,7 @@ function Register(){
             <img className="mx-auto h-12 w-auto" src="https://www.svgrepo.com/show/499664/user-happy.svg" alt="" />
 
             <h2 className="my-3 text-center text-3xl font-bold tracking-tight text-gray-900">
-                Sign up htmlFor an account
+                Sign up for an account
             </h2>
 
 
@@ -65,15 +56,15 @@ function Register(){
                 <div>
                     <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">Username</label>
                     <div className="mt-1">
-                        <input name="username" type="username" required
+                        <input name="username" type="text" required
                             className="px-2 py-3 mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm" onChange={handleChange} />
                     </div>
                 </div>
 
                 <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">Email</label>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
                     <div className="mt-1">
-                        <input name="email" type="email-address" autoComplete="email-address" required
+                        <input name="email" type="email" autoComplete="email" required
                             className="px-2 py-3 mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm" onChange={handleChange} />
                     </div>
                 </div>
@@ -81,12 +72,10 @@ function Register(){
                 <div>
                     <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
                     <div className="mt-1">
-                        <input name="password" type="password" autoComplete="password" required
+                        <input name="password" type="password" autoComplete="new-password" required
                             className="px-2 py-3 mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm" onChange={handleChange} />
                     </div>
                 </div>
-
-
 
                 <div>
                     <button type="submit"
@@ -101,8 +90,5 @@ function Register(){
 </div>
     )
 }
-
-
-    
 
 export default Register
