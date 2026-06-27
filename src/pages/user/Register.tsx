@@ -1,6 +1,6 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
 import { useAppDispatch,useAppSelector } from "../../store/hooks"
-import { registerUser, setStatus } from "../../store/authSlice"
+import { registerUser } from "../../store/authSlice"
 import { Status } from "../../globals/types/type"
 import { Link, useNavigate } from "react-router-dom"
 
@@ -26,11 +26,6 @@ function Register(){
         e.preventDefault()
         dispatch(registerUser(data))
     }
-
-    useEffect(() => {
-        dispatch(setStatus(Status.LOADING))
-    }, [dispatch])
-
     useEffect(()=>{
         if(status === Status.SUCCESS){
             navigate("/login")
