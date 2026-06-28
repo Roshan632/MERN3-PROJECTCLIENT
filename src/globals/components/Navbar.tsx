@@ -2,18 +2,23 @@ import { Link, useNavigate } from "react-router-dom"
 import { useAppSelector, useAppDispatch } from "../../store/hooks"
 import { useEffect, useState } from "react"
 import { logout } from "../../store/authSlice"
-
+import { fetchCartItems } from "../../store/cartSlice"
 
 function Navbar(){
     const dispatch = useAppDispatch()
     const navigate = useNavigate()
     const reduxToken = useAppSelector((store)=>store.auth.user.token)
+    const {items} = useAppSelector((store)=>store.cart)
     const [isLoggedIn,setIsLoggedIn] = useState<boolean>(false)
+    const localStorageToken = localStorage.getItem("tokenHoYo")
 
     useEffect(()=>{
-      const localStorageToken = localStorage.getItem("tokenHoYo")
+      
       setIsLoggedIn(!!localStorageToken || !!reduxToken)
-    },[reduxToken])
+       if(isLoggedIn){
+          dispatch(fetchCartItems())
+        }
+    },[reduxToken,isLoggedIn])
 
 return ( 
     <header className="sticky top-0 bg-white shadow">
@@ -31,15 +36,16 @@ return (
       </div>
       <div className="flex mt-4 sm:mt-0">
         <Link className="px-4" to="/products">Products</Link>
-        <a className="px-4" href="#features">Features</a>
+        {/* <a className="px-4" href="#features">Features</a>
         <a className="px-4" href="#services">Services</a>
         <a className="px-4" href="#stats">Stats</a>
-        <a className="px-4" href="#testimonials">Testimonials</a>
+        <a className="px-4" href="#testimonials">Testimonials</a> */}
       </div>
       <div className="hidden md:block">
         {
             isLoggedIn ? (
               <>
+                <span className="mr-2.5"> <Link to='/my-cart'>Cart <sup>{items.length > 0 ? items.length : 0}</sup> </Link></span>
               <button onClick={() => { dispatch(logout()); navigate('/login'); }} type="button" className="mr-5 py-3 px-8 text-sm bg-teal-500 hover:bg-teal-600 rounded text-white ">Logout
                  </button>
               </>
