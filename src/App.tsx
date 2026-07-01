@@ -13,6 +13,10 @@ import Checkout from './pages/checkout/Checkout'
 import MyOrder from './pages/my-orders/MyOrder'
 import MyOrderDetail from './pages/my-orders-details/MyOrderDetail'
 
+import Categories from './pages/admin/categories/Categories'
+import AdminLayout from './pages/admin/AdminLayout'
+import AdminStats from './pages/admin/stats/AdminStats'
+
 function App() {
   
 
@@ -31,6 +35,8 @@ function App() {
         <Route path="/my-checkout" element={<Checkout />} />
         <Route path="/my-orders" element={<MyOrder />} />
     <Route path="/my-orders/:id" element={<MyOrderDetail />} />
+      <Route path='/admin' element={<AdminStats />} />
+    <Route path='/admin/categories' element={<Categories />} />
      </Routes>
      
      </BrowserRouter>
