@@ -43,7 +43,8 @@ export interface IOrderDetail {
         totalAmount: number,
         phoneNumber: string,
         firstName : string, 
-        lastName : string, 
+        lastName : string,
+        userId : string, 
         Payment: {
             paymentMethod: PaymentMethod,
             paymentStatus: PaymentStatus

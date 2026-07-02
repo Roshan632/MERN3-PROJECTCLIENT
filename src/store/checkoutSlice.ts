@@ -36,14 +36,20 @@ const orderSlice = createSlice({
             const datas = state.orderDetails.find((order)=>order.orderId === orderId)
             datas ? datas.Order.orderStatus = OrderStatus.Cancelled : ""
             // state.orderDetails = data
+             }, 
+        updateOrderStatusinSlice(state:IOrder,action:PayloadAction<{status:OrderStatus,userId:string,orderId:string}>){
+            const {status,orderId} = action.payload 
+            const updateOrder = state.items.map((order)=>order.id == orderId  ? {...order,orderStatus : status} : order)
+            console.log(updateOrder,"UO")
+            state.items = updateOrder
            
         }
     }
 })
 
 export default orderSlice.reducer
-const {setItems,setStatus,setKhaltiUrl,setOrderDetails,updateOrderStatusToCancel} = orderSlice.actions
 
+export const {setItems,setStatus,setKhaltiUrl,setOrderDetails, updateOrderStatusToCancel,updateOrderStatusinSlice} = orderSlice.actions
 export function orderItem(data:IData){
     return async function orderItemThunk(dispatch:AppDispatch){
         try {
