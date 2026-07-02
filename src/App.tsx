@@ -17,7 +17,7 @@ import Categories from './pages/admin/categories/Categories'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminStats from './pages/admin/stats/AdminStats'
 import User from './pages/admin/users/Users'
-
+import AdminProduct from './pages/admin/products/Product'
 
 function App() {
   
@@ -40,6 +40,7 @@ function App() {
       <Route path='/admin' element={<AdminStats />} />
     <Route path='/admin/categories' element={<Categories />} />
      <Route path='/admin/users' element={<User />} />
+      <Route path='/admin/products' element={<AdminProduct />} />
      </Routes>
      
      </BrowserRouter>
