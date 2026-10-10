@@ -1,7 +1,6 @@
-import { type FormEvent, useEffect, useState } from "react"
-import { useAppDispatch, useAppSelector } from "../../../../store/hooks"
-import { addCategory, resetStatus } from "../../../../store/adminCategorySlice"
-import { Status } from "../../../../globals/types/type"
+import { type FormEvent, useState } from "react"
+import { useAppDispatch } from "../../../../store/hooks"
+import { addCategory } from "../../../../store/adminCategorySlice"
 
 
 interface ModalProps{
@@ -10,34 +9,19 @@ interface ModalProps{
 const Modal:React.FC<ModalProps> = ({closeModal} : ModalProps)=>{
     const dispatch = useAppDispatch()
    const [categoryName,setCategoryName] = useState<string>("")
-   const {status} = useAppSelector((store)=>store.categories)
    const [loading,setLoading] = useState(false)
-    const handleSubmit = (e:FormEvent<HTMLFormElement>)=>{
+    const handleSubmit = async (e:FormEvent<HTMLFormElement>)=>{
         e.preventDefault()
+        const normalizedName = categoryName.trim()
+        if (normalizedName.length < 2) return
         setLoading(true)
-        try {
-            
-            dispatch(addCategory(categoryName))
-            setLoading(false)
-        } catch (error) {
-            console.log(error)
-        }
-        }
-    // useEffect(()=>{
-    //     if(status === Status.SUCCESS){
-    //         setLoading(false)
-    //         // closeModal()
-        
-    //     }
-    // },[status])
-
-      useEffect(()=>{
-        if(status === Status.SUCCESS){
-            setLoading(false)
-            closeModal()
-            dispatch(resetStatus())
-        }
-    },[status])
+      const added = await dispatch(addCategory(normalizedName))
+      setLoading(false)
+      if (added) {
+        setCategoryName("")
+        closeModal()
+      }
+    }
 
     return ( 
 <div id="modal" className="fixed inset-0 z-50 flex items-center justify-center">
@@ -55,10 +39,10 @@ const Modal:React.FC<ModalProps> = ({closeModal} : ModalProps)=>{
      <form onSubmit={handleSubmit}>
      <div>
         <label htmlFor="website_url" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category Name</label>
-        <input onChange={(e)=>setCategoryName(e.target.value)} type="text" id="website_url" className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500" placeholder="Electronics,Foods" required />
+        <input onChange={(e)=>setCategoryName(e.target.value)} value={categoryName} type="text" id="website_url" minLength={2} maxLength={50} pattern="[A-Za-z0-9 &-]+" className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500" placeholder="Electronics, Foods" required />
       </div>
       <div className="flex justify-end gap-3">
-        <button onClick={closeModal} id="cancelButton" className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600">
+        <button type="button" onClick={closeModal} id="cancelButton" className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600">
           Cancel
         </button>
          <button id="submitUrlButton" className="flex items-center justify-center px-4 py-2 text-sm font-medium text-white rounded-md bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 dark:from-indigo-500 dark:to-violet-500 dark:hover:from-indigo-600 dark:hover:to-violet-600" disabled={loading}>

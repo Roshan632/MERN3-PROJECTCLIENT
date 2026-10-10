@@ -19,11 +19,20 @@ function MyOrder(){
     },[])
 
      useEffect(()=>{
-      socket.on("statusUpdated",(data:any)=>{
+      const handleStatusUpdated = (data:any) => {
         console.log(data,"Incoming data")
         dispatch(updateOrderStatusinSlice(data))
-      })
-    },[socket])
+      }
+
+      socket.auth = { token: localStorage.getItem("tokenHoYo") }
+      socket.connect()
+      socket.on("statusUpdated", handleStatusUpdated)
+
+      return () => {
+        socket.off("statusUpdated", handleStatusUpdated)
+        socket.disconnect()
+      }
+    },[dispatch])
     return (
         <>
         <Navbar />

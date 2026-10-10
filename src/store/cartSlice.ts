@@ -38,7 +38,7 @@ export const {setItems,setStatus,setUpdateCartItem,setDeleteCartItem} = cartSlic
 export default cartSlice.reducer
 
 export function addToCart(productId:string){
-    return async function addToCartThunk(dispatch:AppDispatch){
+    return async function addToCartThunk(dispatch:AppDispatch): Promise<boolean>{
         try {
              const response = await APIWITHTOKEN.post("/cart",{
                 productId : productId, 
@@ -47,12 +47,15 @@ export function addToCart(productId:string){
             if(response.status === 200){
                 dispatch(setStatus(Status.SUCCESS))
                 dispatch(setItems(response.data.data))
+                return true
             }else{
                 dispatch(setStatus(Status.ERROR))
+                return false
             }
         } catch (error) {
               console.log(error)
             dispatch(setStatus(Status.ERROR))
+              return false
         }
     }
 }

@@ -1,129 +1,95 @@
-import { type ChangeEvent, type FormEvent, useEffect, useState } from "react"
-import { useAppDispatch, useAppSelector } from "../../../../store/hooks"
-import { fetchCategoryItems, resetStatus } from "../../../../store/adminCategorySlice"
-import { Status } from "../../../../globals/types/type"
-import { addProduct } from "../../../../store/adminProductSlice"
+import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
+import { addProduct } from "../../../../store/adminProductSlice";
+import { Status } from "../../../../globals/types/type";
+import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 
-interface ModalProps{
-    closeModal : ()=>void
+export interface IProduct {
+  productName: string;
+  productPrice: number;
+  productTotalStock: number;
+  productDescription: string;
+  categoryId: string;
+  discount?: number;
+  productImage?: File | null;
 }
-export interface IProduct{
-  id?:string,
-  productName : string, 
-  productDescription : string, 
-  productPrice : number , 
-  productTotalStock : number, 
-  categoryId : string, 
-  productImage : File | string
+
+interface ProductModalProps {
+  open?: boolean;
+  onClose?: () => void;
+  categories: { id: string; categoryName: string }[];
 }
-const ProductModal:React.FC<ModalProps> = ({closeModal} : ModalProps)=>{
-    const dispatch = useAppDispatch()
-   const [data,setData] = useState <IProduct>({
-    productName : "", 
-    productDescription :"", 
-    categoryId : "", 
-    productImage : "", 
-    productPrice :0 , 
-    productTotalStock : 0
-   })
-   const handleChange = (e:ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement >)=>{
-    const {name,value} = e.target 
-    setData({
-      ...data, 
-      [name] : name == "productImage" ? (e.target as HTMLInputElement).files?.[0] as File : value 
-    })
-   }
 
-   const {items} = useAppSelector((store)=>store.categories)
-   const {status} = useAppSelector((store)=>store.adminProducts)
-   const [loading,setLoading] = useState(false)
-    const handleSubmit = (e:FormEvent<HTMLFormElement>)=>{
-        e.preventDefault()
-        setLoading(true)
-        try {
-            dispatch(addProduct(data))
-        } catch (error) {
-            console.log(error)
-        }
+function ProductModal({ open = false, onClose, categories }: ProductModalProps) {
+  const dispatch = useAppDispatch();
+  const status = useAppSelector((store) => store.adminProducts.status);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState<IProduct>({
+    productName: "",
+    productPrice: 0,
+    productTotalStock: 0,
+    productDescription: "",
+    categoryId: "",
+    discount: 0,
+    productImage: null,
+  });
 
+  useEffect(() => {
+    if (status === Status.SUCCESS && open && submitting) {
+      onClose?.();
+      setSubmitting(false);
+      setForm({
+        productName: "",
+        productPrice: 0,
+        productTotalStock: 0,
+        productDescription: "",
+        categoryId: "",
+        discount: 0,
+        productImage: null,
+      });
+    } else if (status === Status.ERROR && submitting) {
+      setSubmitting(false);
     }
-    const fetchCategories = ()=>{
-      dispatch(fetchCategoryItems())
-    }
-    useEffect(()=>{
-        if(status === Status.SUCCESS){
-            setLoading(false)
-            closeModal()
-            dispatch(resetStatus())
-        }
-    },[status])
-    return ( 
-<div id="modal" className="fixed inset-0 z-50 flex items-center justify-center">
-  <div className="fixed inset-0 bg-black/50" />
-  <div className="relative w-full max-w-md p-6 bg-white dark:bg-gray-800 rounded-lg shadow-xl">
-    <div className="flex items-center justify-between mb-4">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Add Product</h3>
-      <button onClick={closeModal} id="closeModalButton" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-        <svg className="h-4 w-4 inline-block ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-        </svg>
-        </button>
+  }, [status, open, onClose, submitting]);
+
+  if (!open) return null;
+
+  const updateField = (field: keyof IProduct, value: string | number) => {
+    setForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubmitting(true);
+    dispatch(addProduct(form));
+  };
+
+  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setForm((current) => ({ ...current, productImage: event.target.files?.[0] ?? null }));
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <form onSubmit={handleSubmit} className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded bg-white p-6 shadow-xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Add Product</h2>
+          <button type="button" onClick={onClose} className="text-xl text-gray-500" aria-label="Close">&times;</button>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="sm:col-span-2">Name<input required value={form.productName} onChange={(event) => updateField("productName", event.target.value)} className="mt-1 w-full rounded border p-2" /></label>
+          <label>Price<input required min="0.01" step="0.01" type="number" value={form.productPrice} onChange={(event) => updateField("productPrice", Number(event.target.value))} className="mt-1 w-full rounded border p-2" /></label>
+          <label>Stock<input required min="0" step="1" type="number" value={form.productTotalStock} onChange={(event) => updateField("productTotalStock", Number(event.target.value))} className="mt-1 w-full rounded border p-2" /></label>
+          <label>Category<select required value={form.categoryId} onChange={(event) => updateField("categoryId", event.target.value)} className="mt-1 w-full rounded border p-2"><option value="">Select category</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.categoryName}</option>)}</select></label>
+          <label>Discount<input min="0" max="100" step="0.01" type="number" value={form.discount} onChange={(event) => updateField("discount", Number(event.target.value))} className="mt-1 w-full rounded border p-2" /></label>
+          <label className="sm:col-span-2">Image<input required type="file" accept="image/*" onChange={handleImageChange} className="mt-1 w-full rounded border p-2" /></label>
+          <label className="sm:col-span-2">Description<textarea required value={form.productDescription} onChange={(event) => updateField("productDescription", event.target.value)} className="mt-1 w-full rounded border p-2" rows={4} /></label>
+        </div>
+        <div className="mt-5 flex justify-end gap-3">
+          <button type="button" onClick={onClose} className="rounded border px-4 py-2">Cancel</button>
+          <button type="submit" disabled={submitting} className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50">{submitting ? "Adding..." : "Add Product"}</button>
+        </div>
+      </form>
     </div>
-    <div className="space-y-4">
-     <form onSubmit={handleSubmit}>
-     <div>
-        <label htmlFor="website_url" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Product Name</label>
-        <input name="productName" onChange={handleChange} type="text" id="website_url" className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500" placeholder="Airpods" required />
-      </div>
-      <div className="flex justify-between">
-      <div>
-        <label htmlFor="website_url" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Product Price</label>
-        <input name="productPrice"  onChange={handleChange} type="number" id="website_url" className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500" placeholder="999" required />
-      </div>
-      <div>
-        <label htmlFor="website_url" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Product Stock</label>
-        <input  name="productTotalStock"  onChange={handleChange} type="number" id="website_url" className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500" placeholder="100" required />
-      </div>
-      </div>
-      <div className="flex justify-between">
-      <div>
-        <label htmlFor="website_url" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Product Image</label>
-        <input  name="productImage"  onChange={handleChange} type="file" id="website_url" className="w-[220px] mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"  required />
-      </div>
-      <div>
-        <label htmlFor="website_url" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
-        <select onChange={handleChange} onClick={fetchCategories} name="categoryId" id="" className="w-[170px] h-[50px] border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500">
-            {
-              items.length > 0 && items.map((item)=>{
-                return (
-                    <option value={item.id}>{item.categoryName}</option>
-                )
-              })
-            }
-        </select>
-      </div>
-      </div>
-      <div>
-        <label htmlFor="website_url" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Product Description</label>
-        <textarea name="productDescription" onChange={handleChange}  id="website_url" className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500" placeholder="..." required />
-      </div>
-      <div className="flex justify-end gap-3">
-        <button onClick={closeModal} id="cancelButton" className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600">
-          Cancel
-        </button>
-        <button id="submitUrlButton" className="flex items-center justify-center px-4 py-2 text-sm font-medium text-white rounded-md bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 dark:from-indigo-500 dark:to-violet-500 dark:hover:from-indigo-600 dark:hover:to-violet-600" disabled={loading}>
-          {loading ? "Adding.." : "Add"}
-          <svg className="h-4 w-4 inline-block ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-          </svg>
-        </button>
-      </div>
-     </form>
-    </div>
-  </div>
-</div>
- )
+  );
 }
 
-export default ProductModal
-     
+export default ProductModal;

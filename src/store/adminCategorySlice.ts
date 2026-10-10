@@ -1,4 +1,6 @@
 import { createSlice,type PayloadAction } from "@reduxjs/toolkit";
+import axios from "axios";
+import { toast } from "react-toastify";
 import { Status } from "../globals/types/type";
 import type { AppDispatch } from "./store";
 import  { API, APIWITHTOKEN } from "../http";
@@ -45,18 +47,24 @@ export const {setItems,setStatus,setDeleteCategoryItem,addCategoryToItems,resetS
 export default categorySlice.reducer
 
 export function addCategory(categoryName:string){
-    return async function addCategoryThunk(dispatch:AppDispatch){
+    return async function addCategoryThunk(dispatch:AppDispatch): Promise<boolean>{
         try {
             const response = await APIWITHTOKEN.post("/category",{categoryName})
             if(response.status === 200){
                 dispatch(setStatus(Status.SUCCESS))
                 dispatch(addCategoryToItems(response.data.data))
+                toast.success(response.data?.message ?? "Category added successfully")
+                return true
             }else{
                 dispatch(setStatus(Status.ERROR))
+                toast.error(response.data?.message ?? "Failed to add category")
+                return false
             }
         } catch (error) {
             console.log(error)
             dispatch(setStatus(Status.ERROR))
+            toast.error("Failed to add category")
+            return false
         }
     }
 }
@@ -84,15 +92,19 @@ export function handleCategoryItemDelete(categoryId:string){
     return async function handleCategoryItemDeleteThunk(dispatch:AppDispatch){
         try {
             const response = await APIWITHTOKEN.delete("/category/" + categoryId)
-            if(response.status === 200){
+            if(response.status >= 200 && response.status < 300){
                 dispatch(setDeleteCategoryItem(categoryId))
                 dispatch(setStatus(Status.SUCCESS))
+                toast.success(response.data?.message || "Category deleted successfully")
             }else{
                 dispatch(setStatus(Status.ERROR))
+                toast.error(response.data?.message || "Failed to delete category")
             }
         } catch (error) {
             console.log(error)
             dispatch(setStatus(Status.ERROR))
+            const message = axios.isAxiosError(error) ? error.response?.data?.message : undefined
+            toast.error(message || "Failed to delete category")
         }
     }
 }

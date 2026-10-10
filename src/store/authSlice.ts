@@ -1,5 +1,6 @@
 import { createSlice,type PayloadAction } from "@reduxjs/toolkit";
 import { Status } from "../globals/types/type";
+import { toast } from "react-toastify";
 
 import type { AppDispatch } from "./store";
 import {API} from "../http";
@@ -11,9 +12,11 @@ interface ILoginUser{
 
 interface IUser{
     username : string | null, 
-    email : string | null 
+    email : string | null, 
     password : string | null,
-    token:string | null
+    token:string | null,
+    role?: string | null,
+    isAdmin?: boolean
 }
 
 interface IAuthState{
@@ -27,9 +30,59 @@ const initialState:IAuthState = {
         username : null, 
         email : null, 
         password : null,
-        token:null
+        token: localStorage.getItem("tokenHoYo") ?? null,
+        role: null,
+        isAdmin: false
     }, 
     status : Status.LOADING
+}
+
+const getMessageFromPayload = (payload: unknown, fallback: string): string => {
+    if (typeof payload === "string") return payload
+
+    if (payload && typeof payload === "object") {
+        const maybe = payload as {
+            message?: unknown
+            msg?: unknown
+            error?: unknown
+            detail?: unknown
+            data?: {
+                message?: unknown
+                msg?: unknown
+            }
+        }
+
+        if (typeof maybe.message === "string") return maybe.message
+        if (typeof maybe.msg === "string") return maybe.msg
+        if (typeof maybe.error === "string") return maybe.error
+        if (typeof maybe.detail === "string") return maybe.detail
+
+        if (maybe.data) {
+            if (typeof maybe.data.message === "string") return maybe.data.message
+            if (typeof maybe.data.msg === "string") return maybe.data.msg
+        }
+    }
+
+    return fallback
+}
+
+const getErrorMessage = (error: unknown, fallback: string): string => {
+    if (error && typeof error === "object") {
+        const maybe = error as {
+            response?: {
+                data?: unknown
+            }
+            message?: string
+        }
+
+        if (maybe.response?.data) {
+            return getMessageFromPayload(maybe.response.data, maybe.message ?? fallback)
+        }
+
+        if (typeof maybe.message === "string") return maybe.message
+    }
+
+    return fallback
 }
 const authSlice = createSlice({
     name : "auth", 
@@ -64,7 +117,6 @@ export function registerUser(data:IUser){
         dispatch(setStatus(Status.LOADING))
         try {
              const response = await API.post("/auth/register",data)
-            console.log(response)
             if(response.status === 201){
                 if(response.data.token){
                     localStorage.setItem("tokenHoYo",response.data.token)
@@ -75,14 +127,22 @@ export function registerUser(data:IUser){
                     username: response.data?.username ?? data.username,
                     email: response.data?.email ?? data.email,
                     password: null,
-                    token: response.data?.token ?? null
+                    token: response.data?.token ?? null,
+                    role: response.data?.role ?? null,
+                    isAdmin: response.data?.isAdmin ?? (response.data?.role === "admin")
                 }))
+
+                const successMessage = getMessageFromPayload(response.data, "Registration successful")
+                toast.success(successMessage)
                 dispatch(setStatus(Status.SUCCESS))
             }else{
+                const errorMessage = getMessageFromPayload(response.data, "Registration failed")
+                toast.error(errorMessage)
                 dispatch(setStatus(Status.ERROR))
             }
         } catch (error) {
-            console.log(error)
+            const errorMessage = getErrorMessage(error, "Something went wrong")
+            toast.error(errorMessage)
             dispatch(setStatus(Status.ERROR))
         }
 
@@ -93,7 +153,6 @@ export function loginUser(data:ILoginUser){
         dispatch(setStatus(Status.LOADING))
         try {
                const response = await API.post("/auth/login",data)
-            console.log(response)
             if(response.status === 200){
                 if(response.data?.token){
                     localStorage.setItem("tokenHoYo",response.data.token)
@@ -104,30 +163,42 @@ export function loginUser(data:ILoginUser){
                     username: response.data?.username ?? null,
                     email: response.data?.email ?? data.email,
                     password: null,
-                    token: response.data?.token ?? null
+                    token: response.data?.token ?? null,
+                    role: response.data?.role ?? null,
+                    isAdmin: response.data?.isAdmin ?? (response.data?.role === "admin")
                 }))
+
+                const successMessage = getMessageFromPayload(response.data, "Login successful")
+                toast.success(successMessage)
                 dispatch(setStatus(Status.SUCCESS))
             }else{
+                const errorMessage = getMessageFromPayload(response.data, "Login failed")
+                toast.error(errorMessage)
                 dispatch(setStatus(Status.ERROR))
             }
         } catch (error) {
-            console.log(error)
+            const errorMessage = getErrorMessage(error, "Invalid email or password")
+            toast.error(errorMessage)
             dispatch(setStatus(Status.ERROR))
         }
     }
 }
-function forgotPassword(data:{email : string}){
+export function forgotPassword(data:{email : string}){
     return async function forgotPasswordThunk(dispatch:AppDispatch){
         try {
              const response = await API.post("/auth/forgot-password",data)
-            console.log(response)
             if(response.status === 200){
+                const successMessage = getMessageFromPayload(response.data, "Password reset instructions sent")
+                toast.success(successMessage)
                 dispatch(setStatus(Status.SUCCESS))
             }else{
+                const errorMessage = getMessageFromPayload(response.data, "Failed to send reset instructions")
+                toast.error(errorMessage)
                 dispatch(setStatus(Status.ERROR))
             }
         } catch (error) {
-            console.log(error)
+            const errorMessage = getErrorMessage(error, "Failed to send reset instructions")
+            toast.error(errorMessage)
             dispatch(setStatus(Status.ERROR))
         }
     }

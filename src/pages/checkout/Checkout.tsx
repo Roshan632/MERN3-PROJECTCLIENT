@@ -3,7 +3,7 @@ import Navbar from "../../globals/components/Navbar"
 import { useAppDispatch, useAppSelector } from "../../store/hooks"
 import { PaymentMethod, type IData } from "./types"
 import { orderItem } from "../../store/checkoutSlice"
-import { Status } from "../../globals/types/type"
+import { getMediaUrl } from "../../http"
 
 function Checkout(){
     const dispatch = useAppDispatch()
@@ -44,6 +44,7 @@ function Checkout(){
     }
     const handleSubmit =async (e:FormEvent<HTMLFormElement>)=>{
         e.preventDefault()
+      if (items.length === 0) return
         const productData =  items.length > 0 ? items.map((item)=>{
             return {
                 productId : item.Product.id, 
@@ -71,7 +72,7 @@ function Checkout(){
         <Navbar />
      <div className="font-[sans-serif] bg-white">
   <div className="flex max-sm:flex-col gap-12 max-lg:gap-4 h-full">
-    <div className="bg-gray-100 sm:h-screen sm:sticky sm:top-0 lg:min-w-[370px] sm:min-w-[300px]">
+    <div className="bg-gray-100 sm:h-screen sm:sticky sm:top-0 lg:min-w-92.5 sm:min-w-75">
       <div className="relative h-full">
         <div className="px-4 py-8 sm:overflow-auto sm:h-[calc(100vh-60px)]">
           <div className="space-y-4">
@@ -80,7 +81,7 @@ function Checkout(){
             return ( 
                 <div className="flex items-start gap-4" key={item.id}>
                 <div className="w-32 h-28 max-lg:w-24 max-lg:h-24 flex p-3 shrink-0 bg-gray-200 rounded-md">
-                  <img src={`http://localhost:3000/${item.Product?.productImageUrl}`} className="w-full object-contain" />
+                  <img src={getMediaUrl(item.Product?.productImageUrl)} className="w-full object-contain" alt={item.Product?.productName ?? "Product"} />
                 </div>
                 <div className="w-full">
                   <h3 className="text-sm lg:text-base text-gray-800">{item.Product.productName}</h3>
@@ -109,16 +110,16 @@ function Checkout(){
           <h3 className="text-sm lg:text-base text-gray-800 mb-4">Personal Details</h3>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <input type="text" name="firstName" onChange={handleChange} placeholder="First Name" className="px-4 py-3 bg-gray-100 focus:bg-transparent text-gray-800 w-full text-sm rounded-md focus:outline-blue-600" />
+              <input type="text" name="firstName" onChange={handleChange} placeholder="First Name" required minLength={2} maxLength={50} pattern="[A-Za-z ]+" className="px-4 py-3 bg-gray-100 focus:bg-transparent text-gray-800 w-full text-sm rounded-md focus:outline-blue-600" />
             </div>
             <div>
-              <input type="text" name="lastName" onChange={handleChange} placeholder="Last Name" className="px-4 py-3 bg-gray-100 focus:bg-transparent text-gray-800 w-full text-sm rounded-md focus:outline-blue-600" />
+              <input type="text" name="lastName" onChange={handleChange} placeholder="Last Name" required minLength={2} maxLength={50} pattern="[A-Za-z ]+" className="px-4 py-3 bg-gray-100 focus:bg-transparent text-gray-800 w-full text-sm rounded-md focus:outline-blue-600" />
             </div>
             <div>
-              <input type="email" name="email" onChange={handleChange} placeholder="Email" className="px-4 py-3 bg-gray-100 focus:bg-transparent text-gray-800 w-full text-sm rounded-md focus:outline-blue-600" />
+              <input type="email" name="email" onChange={handleChange} placeholder="Email" required maxLength={254} className="px-4 py-3 bg-gray-100 focus:bg-transparent text-gray-800 w-full text-sm rounded-md focus:outline-blue-600" />
             </div>
             <div>
-              <input type="number" name="phoneNumber" onChange={handleChange} placeholder="Phone No." className="px-4 py-3 bg-gray-100 focus:bg-transparent text-gray-800 w-full text-sm rounded-md focus:outline-blue-600" />
+              <input type="tel" name="phoneNumber" onChange={handleChange} placeholder="Phone No." required pattern="[0-9]{7,15}" inputMode="numeric" className="px-4 py-3 bg-gray-100 focus:bg-transparent text-gray-800 w-full text-sm rounded-md focus:outline-blue-600" />
             </div>
           </div>
         </div>
@@ -126,16 +127,16 @@ function Checkout(){
           <h3 className="text-sm lg:text-base text-gray-800 mb-4">Shipping Address</h3>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <input type="text" name="addressLine" onChange={handleChange} placeholder="Address Line" className="px-4 py-3 bg-gray-100 focus:bg-transparent text-gray-800 w-full text-sm rounded-md focus:outline-blue-600" />
+              <input type="text" name="addressLine" onChange={handleChange} placeholder="Address Line" required minLength={5} maxLength={200} className="px-4 py-3 bg-gray-100 focus:bg-transparent text-gray-800 w-full text-sm rounded-md focus:outline-blue-600" />
             </div>
             <div>
-              <input type="text" name="city" onChange={handleChange} placeholder="City" className="px-4 py-3 bg-gray-100 focus:bg-transparent text-gray-800 w-full text-sm rounded-md focus:outline-blue-600" />
+              <input type="text" name="city" onChange={handleChange} placeholder="City" required minLength={2} maxLength={80} pattern="[A-Za-z ]+" className="px-4 py-3 bg-gray-100 focus:bg-transparent text-gray-800 w-full text-sm rounded-md focus:outline-blue-600" />
             </div>
             <div>
-              <input type="text" name="state" onChange={handleChange} placeholder="State" className="px-4 py-3 bg-gray-100 focus:bg-transparent text-gray-800 w-full text-sm rounded-md focus:outline-blue-600" />
+              <input type="text" name="state" onChange={handleChange} placeholder="State" required minLength={2} maxLength={80} pattern="[A-Za-z ]+" className="px-4 py-3 bg-gray-100 focus:bg-transparent text-gray-800 w-full text-sm rounded-md focus:outline-blue-600" />
             </div>
             <div>
-              <input type="text" name="zipCode" onChange={handleChange} placeholder="Zip Code" className="px-4 py-3 bg-gray-100 focus:bg-transparent text-gray-800 w-full text-sm rounded-md focus:outline-blue-600" />
+              <input type="text" name="zipCode" onChange={handleChange} placeholder="Zip Code" required pattern="[0-9]{4,10}" inputMode="numeric" className="px-4 py-3 bg-gray-100 focus:bg-transparent text-gray-800 w-full text-sm rounded-md focus:outline-blue-600" />
             </div>
             <div>
               <label htmlFor="paymentMethod">Payment Method : </label>

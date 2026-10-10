@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { useEffect } from "react";
 import { cancelOrderAPI, fetchMyOrderDetails } from "../../store/checkoutSlice";
 import { OrderStatus } from "./types";
+import { getMediaUrl } from "../../http";
 
 function MyOrderDetail(){
     const dispatch = useAppDispatch()
@@ -36,14 +37,14 @@ function MyOrderDetail(){
   <div className="mt-10 flex flex-col xl:flex-row jusitfy-center items-stretch w-full xl:space-x-8 space-y-4 md:space-y-6 xl:space-y-0">
     <div className="flex flex-col justify-start items-start w-full space-y-4 md:space-y-6 xl:space-y-8">
       <div className="flex flex-col justify-start items-start dark:bg-gray-800 bg-gray-50 px-4 py-4 md:py-6 md:p-6 xl:p-8 w-full">
-        <p className="text-lg md:text-xl dark:text-white font-semibold leading-6 xl:leading-5 text-gray-800">Customer’s Cart</p>
+        <p className="text-lg md:text-xl dark:text-white font-semibold leading-6 xl:leading-5 text-gray-800">Customer's Cart</p>
         
            {
         orderDetails.length > 0 && orderDetails.map((od)=>{
           return ( 
             <div key={od.id} className="mt-4 md:mt-6 flex flex-col md:flex-row justify-start items-start md:items-center md:space-x-6 xl:space-x-8 w-full">
             <div className="pb-4 md:pb-8 w-full md:w-40">
-              <img className="w-full hidden md:block" src={`http://localhost:3000/${od?.Product?.productImageUrl}`} alt="dress" />
+              <img className="w-full hidden md:block" src={getMediaUrl(od?.Product?.productImageUrl)} alt={od?.Product?.productName ?? "Product"} />
             </div>
            <div className="border-b border-gray-200 md:flex-row flex-col flex justify-between items-start w-full pb-8 space-y-4 md:space-y-0">
               <div className="w-full flex flex-col justify-start items-start space-y-8">

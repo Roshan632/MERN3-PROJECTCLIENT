@@ -1,7 +1,6 @@
 import AdminLayout from "../AdminLayout"
 import CategoryTable from "./components/Table"
-import { useEffect, useState } from "react"
-import { API } from "../../../http"
+import { useEffect } from "react"
 import { fetchCategoryItems } from "../../../store/adminCategorySlice"
 import { useAppDispatch, useAppSelector } from "../../../store/hooks"
 
